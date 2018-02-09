@@ -11,20 +11,24 @@ class Sirang(object):
     def store_meta(db_name, doc=None, doc_id=None):
         if doc is None:
             doc = {}
+            
         dt_now = datetime.datetime.now().str()
         git_commit = subprocess.check_output(["git", "describe", "--always"]).strip()
         doc.update({'exe-date': dt_now, 'git-commit': git_commit})
         if doc_id:
             doc["_id"] = doc_id
 
-        self.store(db_name=db_name, raw_document=doc)
+        self.store(db_name=db_name, raw_document=doc, store={}, inversion=True)
 
     def get_db(self, db_name):
         if db_name not in self.dbs.keys():
             self.dbs[db_name] = self.client.get_database(db_name)
         return self.dbs[db_name]
 
-    def store(self, db_name, raw_document, store, inversion=False, doc_id=None):
+    def store(self, db_name, raw_document, store=None, inversion=False, doc_id=None):
+        if store is None:
+            store = raw_document.keys()
+
         db = self.get_db(db_name)
         posts = db.posts
         doc = self._doc_sub_dict(raw_document, store, inversion)

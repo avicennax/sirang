@@ -1,17 +1,35 @@
-import inspect
+import datetime
 import pymongo
+import subprocess
 
 class Sirang(object):
     def __init__(self, host='mongodb://localhost:27017'):
         self.client = MongoClient(host)
         self.dbs = {}
 
+    def store_meta(db, doc=None, doc_id=None):
+        if doc is None:
+            doc = {}
+        dt_now = datetime.datetime.now().str()
+        git_commit = subprocess.check_output(["git", "describe", "--always"]).strip()
+        doc.update({'exe-date': dt_now, 'git-commit': git_commit})
+        if doc_id:
+            doc["_id"] = doc_id
+
+        self.store(db=db, raw_document=doc)
+
     def get_db(self, db_name):
         if db_name not in self.dbs.keys():
             self.dbs[db_name] = self.client.get_database(db_name)
         return self.dbs[db_name]
 
-    def store(self, db, store, inversion=False, doc_id=None):
+    def store(self, db, raw_document, store, inversion=False, doc_id=None):
+        pass
+
+    def retrieve(self, db, filter):
+        pass
+
+    def dstore(self, db, store, inversion=False, doc_id=None):
         db = self.get_db(db_name)
         posts = db.posts
         new_post = {}
@@ -27,12 +45,12 @@ class Sirang(object):
             return func
         return store_dec
 
-    def retrieve(self, db, retrieve):
+    def dretrieve(self, db, filter):
         db = self.get_db(db_name)
         posts = db.posts
         def store_dec(f):
             def func(*args, **kwargs):
-                retrieved_params = posts.find_one(filter=retrieve)
+                retrieved_params = posts.find_one(filter=filter)
                 kwargs.update(retrieved_params)
                 return f(*args, **kwargs)
             return func
@@ -42,3 +60,6 @@ class Sirang(object):
         if inversion:
             return param_name not in store_list
         return param_name in store_list
+
+    def 
+

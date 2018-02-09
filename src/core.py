@@ -3,11 +3,12 @@ import pymongo
 import subprocess
 
 class Sirang(object):
-    def __init__(self, host='mongodb://localhost:27017'):
+    def __init__(self, host='mongodb://localhost:27017', verbose=0):
         self.client = MongoClient(host)
         self.dbs = {}
+        self.verbose = verbose
 
-    def store_meta(db, doc=None, doc_id=None):
+    def store_meta(db_name, doc=None, doc_id=None):
         if doc is None:
             doc = {}
         dt_now = datetime.datetime.now().str()
@@ -16,20 +17,32 @@ class Sirang(object):
         if doc_id:
             doc["_id"] = doc_id
 
-        self.store(db=db, raw_document=doc)
+        self.store(db_name=db_name, raw_document=doc)
 
     def get_db(self, db_name):
         if db_name not in self.dbs.keys():
             self.dbs[db_name] = self.client.get_database(db_name)
         return self.dbs[db_name]
 
-    def store(self, db, raw_document, store, inversion=False, doc_id=None):
-        pass
+    def store(self, db_name, raw_document, store, inversion=False, doc_id=None):
+        db = self.get_db(db_name)
+        posts = db.posts
+        doc = self._doc_sub_dict(raw_document, store, inversion)
 
-    def retrieve(self, db, filter):
-        pass
+        if doc_id:
+            doc['_id'] = doc_id
 
-    def dstore(self, db, store, inversion=False, doc_id=None):
+        result = posts.insert_one(post)
+        self._verbose_print(result)
+
+    def retrieve(self, db_name, filter):
+        db = self.get_db(db_name)
+        posts = db.posts
+        retrieved_doc = posts.find_one(filter=filter)
+        self._verbose_print(retrieved_params)
+        return retrieved_doc
+
+    def dstore(self, db_name, store, inversion=False, doc_id=None):
         db = self.get_db(db_name)
         posts = db.posts
         new_post = {}
@@ -41,16 +54,19 @@ class Sirang(object):
                     if doc_id:
                         new_post['_id'] = doc_id
                 result = posts.insert_one(post)
+                self._verbose_print(result)
+
                 return f(*args, **kwargs)
             return func
         return store_dec
 
-    def dretrieve(self, db, filter):
+    def dretrieve(self, db_name, filter):
         db = self.get_db(db_name)
         posts = db.posts
         def store_dec(f):
             def func(*args, **kwargs):
                 retrieved_params = posts.find_one(filter=filter)
+                self._verbose_print(retrieved_params)
                 kwargs.update(retrieved_params)
                 return f(*args, **kwargs)
             return func
@@ -61,5 +77,11 @@ class Sirang(object):
             return param_name not in store_list
         return param_name in store_list
 
-    def 
+    def _doc_sub_dict(raw_doc, store, inversion):
+        if inversion:
+            return {key: pair for key, pair in raw.doc.items() if key not in store}
+        return {key: pair for key, pair in raw.doc.items() if key in store}
 
+    def _verbose_print(pstr):
+        if self.verbose == 1:
+            print(pstr)

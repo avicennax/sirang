@@ -80,7 +80,7 @@ class Sirang(object):
     def dretrieve(self, db_name, filter):
         db = self.get_db(db_name)
         posts = db.posts
-        def store_dec(f):
+        def retrieve_dec(f):
             def func(*args, **kwargs):
                 retrieved_params = posts.find_one(filter=filter)
                 self._verbose_print(retrieved_params)

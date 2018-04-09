@@ -1,7 +1,7 @@
 from distutils.core import setup
 
 setup(
-    name='Sirang',
+    name='sirang',
     version='0.1.0',
     author='Simon Haxby',
     author_email='simon.haxby@gmail.com',

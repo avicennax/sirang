@@ -9,7 +9,6 @@ setup(
     packages=['sirang'],
     license='MIT',
     description='Module for storing and retrieve experiment parameters',
-    python_requires='>=3.4',
     long_description=open('README.md').read(),
     install_requires=open('requirements.txt').read().split('\n')[:-1]
 )

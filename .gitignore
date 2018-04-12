@@ -1,3 +1,5 @@
 *.pyc
 !*/.gitkeep
 data/
+notebooks/
+.DS_Store

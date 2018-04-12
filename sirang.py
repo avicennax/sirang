@@ -22,7 +22,7 @@ class Sirang(object):
         """
         if doc is None:
             doc = {}
-       
+
         dt_now = str(datetime.datetime.now())
         git_commit = subprocess.check_output(["git", "describe", "--always"]).strip()
         doc.update({'exe-date': dt_now, 'git-commit': git_commit})
@@ -80,6 +80,7 @@ class Sirang(object):
         db = self.get_db(db_name)
         posts = db.posts
         new_post = {}
+
         def store_dec(f):
             @wraps
             def func(*args, **kwargs):
@@ -107,7 +108,7 @@ class Sirang(object):
         """
         db = self.get_db(db_name)
         posts = db.posts
-        
+
         def retrieve_dec(f):
             def func(*args, **kwargs):
                 retrieved_params = posts.find_one(filter=filter)
@@ -134,4 +135,3 @@ class Sirang(object):
     def _verbose_print(self, pstr):
         if self.verbose == 1:
             print(pstr)
-

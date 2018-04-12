@@ -6,58 +6,15 @@ from functools import wraps
 
 class Sirang(object):
 
-    def __init__(self):
+    def init(self, host='mongodb://localhost:27017', verbose=0):
         self.dbs = {}
-
-    def initialize_connection(self, host='mongodb://localhost:27017', verbose=0, retrieve_only=False):
-        self.retrieve_only = retrieve_only
         self.client = pymongo.MongoClient(host)
         self.verbose = verbose
         return self
 
-    def ignore(self, func):
-        """
-        If retrieve_only flag set to True, then the function is not called and 0
-        is returned.
-        """
-        @wraps
-        def inner_func(*args, **kwargs):
-            if self.retrieve_only:
-                return 0
-            else:
-                return func(*args, **kwargs)
-        return inner_func
-
-    def ignore_dec(self, decorated_func):
-        """
-        Extends ignore to parameterized decorators.
-        ignore_dec takes a parameterized decorator (pd0) and if the ignore
-        flag is set to True, returns a new parameterized decorator that just calls
-        the function that 'pd0' wraps. If False, then 'pd0' is called
-        as normally.
-        """
-        def decorated_func_wrapper(*dec_args, **dec_kwargs):
-            if self.retrieve_only:
-                def parameterized_dec(*dummy_args, **dummy_kwargs):
-                    def dec_func_wrapper(func):
-                        @wraps
-                        def inner_func(*args, **kwargs):
-                            return func(*args, **kwargs)
-                        return inner_func
-                    return dec_func_wrapper
-                return parameterized_dec(*dec_args, **dec_kwargs)
-            else:
-                return decorated_func(*dec_args, **dec_kwargs)
-        return decorated_func_wrapper
-    
-    @self.ignore
     def db_doc_count(self, db_name):
-        """
-        Returns document count in connected DB.
-        """
         return self.get_db(db_name).posts.count()
 
-    @self.ignore
     def store_meta(self, db_name, doc=None, doc_id=None):
         """
         Stores experiment meta-data, e.g: git commmit info of
@@ -65,7 +22,7 @@ class Sirang(object):
         """
         if doc is None:
             doc = {}
-            
+       
         dt_now = str(datetime.datetime.now())
         git_commit = subprocess.check_output(["git", "describe", "--always"]).strip()
         doc.update({'exe-date': dt_now, 'git-commit': git_commit})
@@ -86,7 +43,6 @@ class Sirang(object):
             self.dbs[db_name] = self.client.get_database(db_name)
         return self.dbs[db_name]
 
-    @self.ignore
     def store(self, db_name, raw_document, store=None, inversion=False, doc_id=None):
         """
         Store new document through client connection
@@ -113,10 +69,9 @@ class Sirang(object):
         db = self.get_db(db_name)
         posts = db.posts
         retrieved_doc = posts.find_one(filter=filter)
-        self._verbose_print(retrieved_params)
+        self._verbose_print(retrieved_doc)
         return retrieved_doc
 
-    @self.ignore_dec
     def dstore(self, db_name, store, inversion=False, doc_id=None, store_return=False):
         """
         Decorated version of store.
@@ -152,6 +107,7 @@ class Sirang(object):
         """
         db = self.get_db(db_name)
         posts = db.posts
+        
         def retrieve_dec(f):
             def func(*args, **kwargs):
                 retrieved_params = posts.find_one(filter=filter)
@@ -159,7 +115,7 @@ class Sirang(object):
                 kwargs.update(retrieved_params)
                 return f(*args, **kwargs)
             return func
-        return store_dec
+        return retrieve_dec
 
     def _include(self, param_name, store_list, inversion):
         """
@@ -178,3 +134,4 @@ class Sirang(object):
     def _verbose_print(self, pstr):
         if self.verbose == 1:
             print(pstr)
+

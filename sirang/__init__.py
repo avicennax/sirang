@@ -1,1 +1,1 @@
-from sirang import Sirang
+from .base import Sirang

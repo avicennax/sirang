@@ -28,7 +28,7 @@ class Sirang():
             Specifies verbosity level
         """
         self.dbs = {}
-        self.client = pymongo.MongoClient(host)
+        self.client = pymongo.MongoClient(uri)
         self.verbose = verbose
 
     def collection_doc_count(self, db_name, collection_name):

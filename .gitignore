@@ -3,3 +3,4 @@
 data/
 notebooks/
 .DS_Store
+.egg-info/

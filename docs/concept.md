@@ -1,4 +1,4 @@
-# SKEET - Simon's Komputational Expert Experiment Tracker
+# Sirang
 
 Assumptions:
 - Experiment parameters are largely not hard coded.

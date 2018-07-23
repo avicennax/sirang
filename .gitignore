@@ -4,3 +4,6 @@ data/
 notebooks/
 .DS_Store
 .egg-info/
+.cache/
+.pytest_cache/
+sirang.egg-info/

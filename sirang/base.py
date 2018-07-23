@@ -117,6 +117,7 @@ class Sirang():
             Key/pairs values to be stored in new document.
         keep : list-like, optional
             List of keys in `raw_document` to keep.
+            If None, keep all items.
         inversion : bool, optional
             Specifies whether to invert keys in `keep`,
             e.g: calling `store` with in these args:
@@ -181,7 +182,7 @@ class Sirang():
         return retrieved_doc
 
     def dstore(
-        self, db_name, collection_name, store, inversion=False,
+        self, db_name, collection_name, keep=None, inversion=False,
         doc_id=None, store_return=False):
         """
         Decorated version of store.
@@ -192,18 +193,23 @@ class Sirang():
         new_post = {}
 
         def store_dec(f):
-            @wraps
-            def func(*args, **kwargs):
+            def func(**kwargs):
+                # If keep is overwritten in the function body
+                # then keep will be removed from the it's closure's
+                # free variables and will yield a reference before
+                # assignment error.
+                keepers = keep if keep else kwargs.keys()
                 for param_name, param in kwargs.items():
-                    if self._include(param_name, store, inversion):
+                    if self._include(param_name, keepers, inversion):
                         new_post[param_name] = param
                     if doc_id:
                         new_post['_id'] = doc_id
                 if store_return:
-                    res_store, res = f(*args, **kwargs)
+                    res_store, res = f(**kwargs)
                     new_post.update(res_store)
                 else:
-                    res = f(*args, **kwargs)
+                    res = f(**kwargs)
+                import ipdb; ipdb.set_trace() 
                 result = collection.insert_one(new_post)
                 res_id = str(result.inserted_id)
                 self._verbose_print(res_id)

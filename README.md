@@ -6,7 +6,6 @@ A lighweight, pymongo-based framework for easily storing and retrieving experime
 
 
 # Install
----
 ## Installation
 
 Current only the bleeding edge is available for download via:
@@ -26,7 +25,6 @@ pip install .
 * pytest (optional)
 
 # Quickstart
----
 * Ensure MongoDB is correctly installed, see: https://docs.mongodb.com/manual/installation/
 * Install Sirang using the instructions above.
-* Check out the toy examples to see how to use Sirang to see how to use Sirang.
+* Check out the [toy examples](https://github.com/avicennax/sirang/tree/master/examples) to see how to use Sirang to see how to use Sirang.

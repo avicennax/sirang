@@ -194,13 +194,10 @@ class Sirang():
 
         def store_dec(f):
             def func(**kwargs):
-                # If keep is overwritten in the function body
-                # then keep will be removed from the it's closure's
-                # free variables and will yield a reference before
-                # assignment error.
-                keepers = keep if keep else kwargs.keys()
+                nonlocal keep
+                keep = keep if keep else kwargs.keys()
                 for param_name, param in kwargs.items():
-                    if self._include(param_name, keepers, inversion):
+                    if self._include(param_name, keep, inversion):
                         new_post[param_name] = param
                     if doc_id:
                         new_post['_id'] = doc_id
@@ -209,7 +206,6 @@ class Sirang():
                     new_post.update(res_store)
                 else:
                     res = f(**kwargs)
-                import ipdb; ipdb.set_trace() 
                 result = collection.insert_one(new_post)
                 res_id = str(result.inserted_id)
                 self._verbose_print(res_id)

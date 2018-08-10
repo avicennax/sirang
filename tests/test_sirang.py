@@ -106,13 +106,13 @@ def test_store_decorator(sirang_instance):
     assert 'arg2' in no_invert_doc.keys()
     assert 'arg3' not in no_invert_doc.keys()
     assert 'arg4' not in no_invert_doc.keys()
-    
+
     assert 'arg1' not in invert_doc.keys()
     assert 'arg2' not in invert_doc.keys()
     assert 'arg3' in invert_doc.keys()
     assert 'arg4' in invert_doc.keys()
-    
-    # Test store_return=True and doc_id_template
+
+    # Test store_return=True and doc_id_template != None
     test_key = 'x'
     counter = 5
 
@@ -121,18 +121,15 @@ def test_store_decorator(sirang_instance):
 
     ret_store = sirang_instance.dstore(
         db, collection, keep=['arg1', 'arg2'], inversion=False,
-        doc_id_template="res_store_{}", id_counter=counter, 
+        doc_id_template="res_store_{}", id_counter=counter,
         store_return=True)(store_returns_func)
 
     a, b, c, d = range(4)
 
     assert ret_store(arg1=a, arg2=b, arg3=c, arg4=d) == c
     store_return_doc = sirang_instance.retrieve(
-        db, collection, 
+        db, collection,
         filter_criteria={'_id': "res_store_{}".format(counter)})[0]
 
     assert test_key in store_return_doc.keys()
     assert store_return_doc[test_key] == b
-    
-        #self, db_name, collection_name, keep=None, inversion=False,
-        #doc_id=None, store_return=False):

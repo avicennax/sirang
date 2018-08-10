@@ -153,7 +153,7 @@ class Sirang():
 
     def retrieve(self, db_name, collection_name, filter_criteria):
         """
-        Fetch a single document based on passed filter.
+        Fetches all documents matching a passed filter.
 
         Parameters
         -----------
@@ -169,24 +169,33 @@ class Sirang():
 
         Returns
         -------
-        retrieved_doc : dict or None
-            If document match is found, a dictionary of the document's
-            key/value pairs is returned, otherwise None..
-
+        retrieved_docs : list
+            A list of all the documents that match the passed criteria.
         """
         db = self.get_db(db_name)
         collection = db[collection_name]
-        retrieved_doc = collection.find_one(filter=filter_criteria)
-        self._verbose_print(retrieved_doc)
+        retrieved_docs = collection.find(filter=filter_criteria)
+        self._verbose_print(retrieved_docs)
 
-        return retrieved_doc
+        return [doc for doc in retrieved_docs]
 
     def dstore(
         self, db_name, collection_name, keep=None, inversion=False,
-        doc_id=None, store_return=False):
+        store_return=False, doc_id_template=None, id_counter=0):
         """
         Decorated version of store.
         See: store.
+
+        Parameters
+        ----------
+        doc_id_template : str (optional)
+            Unformatted v3. style string with one unnamed argument,
+            e.g: 'doc-id-{}'. Everytime the function is called, the
+            id_counter parameter is incremented and used to format
+            the doc_id_template string, which is used as the stored
+            document's '_id' unique key.
+        id_counter : int (optional)
+            Starting value for counter described above.
         """
         db = self.get_db(db_name)
         collection = db[collection_name]
@@ -194,13 +203,14 @@ class Sirang():
 
         def store_dec(f):
             def func(**kwargs):
-                nonlocal keep
+                nonlocal keep, id_counter
                 keep = keep if keep else kwargs.keys()
                 for param_name, param in kwargs.items():
                     if self._include(param_name, keep, inversion):
                         new_post[param_name] = param
-                    if doc_id:
-                        new_post['_id'] = doc_id
+                if doc_id_template:
+                    new_post['_id'] = doc_id_template.format(id_counter)
+                    id_counter += 1
                 if store_return:
                     res_store, res = f(**kwargs)
                     new_post.update(res_store)

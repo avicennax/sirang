@@ -9,9 +9,9 @@ class Sirang():
     Sirang contains effectively 3 core calls:
         - store_meta
         - store/dstore
-        - retrieve/dretrieve
+        - retrieve
 
-    For `store` and `retrieve` there are both decorated and
+    For `store` there are both decorated and
     non-decorated calls, with the decorated calls being pre-fixed
     by 'd'.
     """
@@ -35,7 +35,7 @@ class Sirang():
         """Get total number of documents from a collection in a DB."""
         return self.get_db(db_name)[collection_name].count()
 
-    def store_meta(self, db_name, collection, doc=None, doc_id=None):
+    def store_meta(self, db_name, collection_name, doc=None, doc_id=None):
         """
         Stores experiment meta-data, e.g: git commmit info of
         executing dir, experiment exe timedate, other passed parameters.
@@ -68,12 +68,12 @@ class Sirang():
         if doc_id:
             doc["_id"] = doc_id
         else:
-            doc["_id"] = self.collection_doc_count(db_name) + 1
+            doc["_id"] = self.collection_doc_count(db_name, collection_name) + 1
 
         # Calls store with pre-built meta-data document
         res_id = self.store(
-            db_name=db_name, collection_name=collection, raw_document=doc,
-            store={}, inversion=True)
+            db_name=db_name, collection_name=collection_name, raw_document=doc,
+            keep={}, inversion=True)
 
         return res_id
 
@@ -212,23 +212,6 @@ class Sirang():
                 return res
             return func
         return store_dec
-
-    def dretrieve(self, db_name, collection_name, filter_criteria):
-        """
-        Decorated version of retrieve.
-        See: retrieve.
-        """
-        db = self.get_db(db_name)
-        collection = db[collection]
-
-        def retrieve_dec(f):
-            def func(*args, **kwargs):
-                retrieved_params = collection.find_one(filter=filter_criteria)
-                self._verbose_print(retrieved_params)
-                kwargs.update(retrieved_params)
-                return f(*args, **kwargs)
-            return func
-        return retrieve_dec
 
     def _include(self, param_name, store_list, inversion):
         """

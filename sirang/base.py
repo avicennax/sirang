@@ -199,10 +199,10 @@ class Sirang():
         """
         db = self.get_db(db_name)
         collection = db[collection_name]
-        new_post = {}
 
         def store_dec(f):
             def func(**kwargs):
+                new_post = {}
                 nonlocal keep, id_counter
                 keep = keep if keep else kwargs.keys()
                 for param_name, param in kwargs.items():

@@ -17,8 +17,8 @@ experiment = sirang.Sirang()
 # Decorate function whose parameters you want to capture,
 # in our case the initial optimization guess.
 @experiment.dstore(
-    db_name='opt-results', 
-    collection_name='rosenbrock', 
+    db_name='opt-results',
+    collection_name='rosenbrock',
     store_return=True
 )
 def opt_func(x0):
@@ -26,8 +26,8 @@ def opt_func(x0):
     res = sciop.minimize(sciop.rosen, x0, method='Nelder-Mead')
     # MongoDB doesn't like numpy arrays unfortunately.
     x_min = res.x.tolist()
-    # Store the result with key: local-opt. Here the first 
-    # argument will be stored in our DB, and second actually 
+    # Store the result with key: local-opt. Here the first
+    # argument will be stored in our DB, and second actually
     # returned to the calling function.
     return {'local-opt': x_min}, x_min
 
@@ -49,7 +49,7 @@ if __name__ == "__main__":
         help="Number of random initial guesses.", required=True)
     parser.add_argument(
         '-l', '--init-variance', type=float,
-        help="Variance of mean 0 Normal used generate initial guesses.", 
+        help="Variance of Normal with mean 0, used to generate initial guesses.",
         default=100.0)
 
     args = vars(parser.parse_args())

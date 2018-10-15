@@ -35,6 +35,7 @@ def opt_func(x0):
 def main(num_of_inits, init_variance):
     """Initial guesses generated from Normal with user specified variance."""
     for n in range(num_of_inits):
+        # MongoDB doesn't like numpy arrays unfortunately.
         x0 = np.random.normal(0, init_variance, 2).tolist()
         # Positional arguments are not allowed.
         x_min = opt_func(x0=x0)

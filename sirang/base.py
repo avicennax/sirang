@@ -1,7 +1,14 @@
+"""
+base.py
+
+Contains core Sirang experiment logger class.
+"""
+
 import datetime
-import pymongo
+import logging
 import subprocess
-from functools import wraps
+
+import pymongo
 
 
 class Sirang():
@@ -100,8 +107,8 @@ class Sirang():
         return self.dbs[db_name]
 
     def store(
-        self, db_name, collection_name, raw_document, keep=None,
-        inversion=False, doc_id=None):
+            self, db_name, collection_name, raw_document, keep=None,
+            inversion=False, doc_id=None):
         """
         Store new document through client connection.
 
@@ -136,8 +143,8 @@ class Sirang():
             keep = raw_document.keys()
 
         # Fetch database and collection to store document in.
-        db = self.get_db(db_name)
-        collection = db[collection_name]
+        db_instance = self.get_db(db_name)
+        collection = db_instance[collection_name]
         doc = self._doc_sub_dict(raw_document, keep, inversion)
 
         # Set unique document ID if not defined.
@@ -172,16 +179,16 @@ class Sirang():
         retrieved_docs : list
             A list of all the documents that match the passed criteria.
         """
-        db = self.get_db(db_name)
-        collection = db[collection_name]
+        db_instance = self.get_db(db_name)
+        collection = db_instance[collection_name]
         retrieved_docs = collection.find(filter=filter_criteria)
         self._verbose_print(retrieved_docs)
 
         return [doc for doc in retrieved_docs]
 
     def dstore(
-        self, db_name, collection_name, keep=None, inversion=False,
-        store_return=False, doc_id_template=None, id_counter=0):
+            self, db_name, collection_name, keep=None, inversion=False,
+            store_return=False, doc_id_template=None, id_counter=0):
         """
         Decorated version of store.
         See: store.
@@ -197,10 +204,10 @@ class Sirang():
         id_counter : int (optional)
             Starting value for counter described above.
         """
-        db = self.get_db(db_name)
-        collection = db[collection_name]
+        db_instance = self.get_db(db_name)
+        collection = db_instance[collection_name]
 
-        def store_dec(f):
+        def store_dec(dec_func):
             def func(**kwargs):
                 new_post = {}
                 nonlocal keep, id_counter
@@ -212,10 +219,10 @@ class Sirang():
                     new_post['_id'] = doc_id_template.format(id_counter)
                     id_counter += 1
                 if store_return:
-                    res_store, res = f(**kwargs)
+                    res_store, res = dec_func(**kwargs)
                     new_post.update(res_store)
                 else:
-                    res = f(**kwargs)
+                    res = dec_func(**kwargs)
                 result = collection.insert_one(new_post)
                 res_id = str(result.inserted_id)
                 self._verbose_print(res_id)
@@ -239,4 +246,4 @@ class Sirang():
 
     def _verbose_print(self, pstr):
         if self.verbose == 1:
-            print(pstr)
+            logging.info(pstr)

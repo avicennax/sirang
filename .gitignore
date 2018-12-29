@@ -7,3 +7,5 @@ notebooks/
 .cache/
 .pytest_cache/
 sirang.egg-info/
+*/tmpdir
+.pyre*
